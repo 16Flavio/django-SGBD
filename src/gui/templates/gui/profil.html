@@ -1,0 +1,355 @@
+{% extends "gui/index.html" %}
+{% load static %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-info">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% block main_content %}
+
+    <style>
+        img{
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            background-color: rgba(230, 230, 230, 1); /* Gris clair */
+            padding: 10px;
+            border: 1px solid #ddd; /* Bordure fine */
+        }
+
+        th {
+            background-color: rgba(200, 200, 200, 1); /* Gris légèrement plus foncé pour l'en-tête */
+        }
+
+        /* Style pour les champs d'informations (input en lecture seule) */
+        input[readonly] {
+            background-color: rgba(240, 240, 240, 1); /* Fond gris clair */
+            border: 1px solid white; /* Bordure légère */
+            color: #333; /* Couleur du texte */
+            padding: 8px;
+            border-radius: 5px; /* Coins légèrement arrondis */
+        }
+
+        /* Supprime le fond global des sections précédentes */
+        div.row.g-3, main.container {
+            background-color: transparent; /* Fond transparent */
+        }
+
+        body {
+            position: relative; /* Nécessaire pour positionner le pseudo-élément */
+            margin: 0;
+            padding: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'gui/Filigrane.jpg' %}") no-repeat center center;
+            background-size: cover; /* ou contain selon le besoin */
+            opacity: 0.1; /* Transparence de l'image */
+            z-index: -1; /* Met l'image en arrière-plan */
+        }
+
+        .content {
+            position: relative;
+            z-index: 2; /* Garde le contenu par-dessus */
+            padding: 20px;
+        }
+        
+        text-left {
+        text-align: left; /* Aligner le texte à gauche */
+    }
+    </style>
+
+<main role="main" class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <div class="text-center">
+        {% if sport_type == "Badminton" %}
+            <img src="{% static 'gui/badminton.png' %}" class="rounded mb-3" alt="badminton_image" height="200" style="border: 5px solid black">
+            <div class="row g-3">
+                <div class="col">
+                    <label for="first_name" class="form-label fs-4" style="color: midnightblue;">Prénom</label>
+                    <input type="text" class="form-control" id="first_name" value="{{ first_name }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="last_name" class="form-label fs-4" style="color: midnightblue;">Nom de famille</label>
+                    <input type="text" class="form-control" id="last_name" value="{{ last_name }}" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="username" class="form-label fs-4" style="color: midnightblue;">Username</label>
+                    <input type="text" class="form-control" id="username" value="{{ username }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="email" class="form-label fs-4" style="color: midnightblue;">Email</label>
+                    <input type="text" class="form-control" id="email" value="{{ email }}" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="sexe" class="form-label fs-4" style="color: midnightblue;">Sexe</label>
+                    <input type="text" class="form-control" id="sexe" value="{{ sexe }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="sport_type" class="form-label fs-4" style="color: midnightblue;">Niveau</label>
+                    <input type="text" class="form-control" id="niveau" value="{{ niveau }}/10" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="niveau" class="form-label fs-4" style="color: midnightblue;">Sport</label>
+                    <input type="text" class="form-control" id="sport_type" value="{{ sport_type }}" readonly>
+                </div>
+            </div>
+
+            <h1>Matchs à venir</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Joueur 1/Equipe 1</th>
+                <th>Joueur 2/Equipe 2</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in matchAVenir %}
+                {% if info.type == "Simple" %}
+            <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur1.user.username %}">{{ info.joueur1.user.username }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur2.user.username %}">{{ info.joueur2.user.username }}</a>
+                </td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% else %}
+                <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>{{ info.equipe1.nom_equipe }}</td>
+                <td>{{ info.equipe2.nom_equipe }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="5">Aucun match à venir trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Matchs joués</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Joueur(s) concerné(s)</th>
+                <th>Adversaire(s)</th>
+                <th>Gagnant</th>
+                <th>Score</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in matchFait %}
+                {% if info.type == "Simple" %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'profile' info.joueur1.user.username %}">{{ info.joueur1.user.username }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'profile' info.joueur2.user.username %}">{{ info.joueur2.user.username }}</a>
+                        </td>
+                        <td>{{ info.gagnant }}</td>
+                        <td>{{ info.match.score }}</td>
+                        <td>{{ info.match.date_heure_match }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                        </td>
+                        <td>{{ info.equipe1.nom_equipe }}</td>
+                        <td>{{ info.equipe2.nom_equipe }}</td>
+                        <td>{{ info.gagnant }}</td>
+                        <td>{{ info.score }}</td>
+                        <td>{{ info.match.date_heure_match }}</td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="6">Aucun match trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+            {% if request.user.username == username %}
+                <div class="d-grid gap-2 mt-4">
+                    <a class="btn btn-danger" href="{% url 'logout' %}" style="width: 100%; padding: 10px;">Déconnexion</a>
+                    <form method="POST" action="{% url 'supprimer_compte' %}" style="width: 100%;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="width: 100%; padding: 10px; background-color: grey; color: white;">Supprimer mon compte</button>
+                    </form>
+                </div>
+            {% endif %}
+        {% else %}
+            <img src="{% static 'gui/tennis.png' %}" class="rounded mb-3" alt="badminton_image" height="200" style="border: 5px solid black;">
+            <div class="row g-3">
+                <div class="col">
+                    <label for="first_name" class="form-label fs-4" style="color: midnightblue;">Prénom</label>
+                    <input type="text" class="form-control" id="first_name" value="{{ first_name }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="last_name" class="form-label fs-4" style="color: midnightblue;">Nom de famille</label>
+                    <input type="text" class="form-control" id="last_name" value="{{ last_name }}" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="username" class="form-label fs-4" style="color: midnightblue;">Username</label>
+                    <input type="text" class="form-control" id="username" value="{{ username }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="email" class="form-label fs-4" style="color: midnightblue;">Email</label>
+                    <input type="text" class="form-control" id="email" value="{{ email }}" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="sexe" class="form-label fs-4" style="color: midnightblue;">Sexe</label>
+                    <input type="text" class="form-control" id="sexe" value="{{ sexe }}" readonly>
+                </div>
+                <div class="col">
+                    <label for="sport_type" class="form-label fs-4" style="color: midnightblue;">Niveau</label>
+                    <input type="text" class="form-control" id="niveau" value="{{ niveau }}/10" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <label for="niveau" class="form-label fs-4" style="color: midnightblue;">Sport</label>
+                    <input type="text" class="form-control" id="sport_type" value="{{ sport_type }}" readonly>
+                </div>
+            </div>
+
+            <h1>Matchs à venir</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Joueur 1/Equipe 1</th>
+                <th>Joueur 2/Equipe 2</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in matchAVenir %}
+                {% if info.type == "Simple" %}
+            <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur1.user.username %}">{{ info.joueur1.user.username }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur2.user.username %}">{{ info.joueur2.user.username }}</a>
+                </td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% else %}
+                <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>{{ info.equipe1.nom_equipe }}</td>
+                <td>{{ info.equipe2.nom_equipe }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="5">Aucun match à venir trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Matchs joués</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Joueur 1/Equipe 1</th>
+                <th>Joueur 2/Equipe 2</th>
+                <th>Gagnant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in matchFait %}
+                {% if info.type == "Simple" %}
+            <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur1.user.username %}">{{ info.joueur1.user.username }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur2.user.username %}">{{ info.joueur2.user.username }}</a>
+                </td>
+                <td>{{ info.gagnant }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% else %}
+                    <tr>
+                <td>
+                    <a href="{% url 'tournoi_details' info.match.tournoi.idtournoi %}">{{ info.match.id_match }}</a>
+                </td>
+                <td>{{ info.equipe1.nom_equipe }}</td>
+                <td>{{ info.equipe2.nom_equipe }}</td>
+                <td>{{ info.gagnant }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+                {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="6">Aucun match trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+            {% if request.user.username == username %}
+            <div class="d-grid gap-2 mt-4">
+                <a class="btn btn-danger" href="{% url 'logout' %}" style="width: 100%; padding: 10px;">Déconnexion</a>
+                <form method="POST" action="{% url 'supprimer_compte' %}" style="width: 100%;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="width: 100%; padding: 10px; background-color: grey; color: white;">Supprimer mon compte</button>
+                </form>
+            </div>
+                {% endif %}
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

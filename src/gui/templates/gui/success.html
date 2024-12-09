@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+
+{% block main_content %}
+    <main role="main" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-lg">
+                        <div class="card-header text-center bg-success text-white">
+                            <h2>Message envoyé avec succès !</h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="lead text-center">Merci beaucoup pour votre message. Nous avons bien reçu votre demande et nous reviendrons vers vous dans les plus brefs délais.</p>
+                            <div class="text-center">
+                                <a href="/" class="btn btn-primary btn-lg mt-3">Retour à l'accueil</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

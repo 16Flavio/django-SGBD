@@ -1,0 +1,83 @@
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<div style="text-align: center;">
+    <h2>Inscription à RAQTOUR</h2>
+</div>
+
+<form onsubmit="return validateForm()" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <!-- Vos autres champs ici -->
+
+  <div class="row mb-3">
+    <div class="col-sm-10 offset-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="gridCheck1" required>
+        <label class="form-check-label" for="gridCheck1">
+          *J'accepte la <a href="#" data-bs-toggle="modal" data-bs-target="#charteModal">charte de RAQTOUR</a>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-grid gap-2">
+    <button class="btn btn-success" type="submit">Confirmer l'inscription</button>
+  </div>
+</form>
+
+<!-- Modale pour afficher la charte -->
+<div class="modal fade" id="charteModal" tabindex="-1" aria-labelledby="charteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="charteModalLabel">Charte RAQTOUR</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h2>Bienvenue sur notre site dédié à la gestion des tournois amicaux !</h2>
+        <p>Afin de garantir une expérience agréable et équitable pour tous, nous avons établi une charte de conduite que chaque utilisateur s’engage à respecter.</p>
+
+        <h3>1. Respect et Fair-play</h3>
+        <ul>
+          <li>Le respect mutuel est essentiel : adoptez une attitude bienveillante envers les autres joueurs, arbitres, et administrateurs.</li>
+          <li>Les comportements irrespectueux, insultes ou discriminations de toute nature ne seront pas tolérés.</li>
+          <li>Jouez dans un esprit de fair-play : respectez les règles du jeu et acceptez les décisions prises.</li>
+        </ul>
+
+        <h3>2. Gestion des Matchs</h3>
+        <ul>
+          <li>Les matchs doivent être organisés dans le respect des règles et des horaires établis.</li>
+          <li>Toute demande de modification ou d’annulation doit être signalée aux administrateurs en amont.</li>
+          <li>Veillez à entrer les résultats correctement et honnêtement.</li>
+        </ul>
+
+        <h3>3. Communication</h3>
+        <p>Pour toute question ou problème, n’hésitez pas à nous contacter via les moyens indiqués.</p>
+
+        <h3>4. Administration</h3>
+        <ul>
+          <li>Si vous souhaitez devenir administrateur, contactez-nous via le formulaire de contact ou par e-mail.</li>
+          <li>Les administrateurs se réservent le droit de modérer les contenus et de sanctionner les comportements inappropriés.</li>
+        </ul>
+
+        <h3>5. Sanctions</h3>
+        <ul>
+          <li>Tout manquement à cette charte peut entraîner :</li>
+          <ul>
+            <li>Un avertissement.</li>
+            <li>Une suspension temporaire.</li>
+            <li>Une exclusion définitive en cas de récidive ou de faute grave.</li>
+          </ul>
+        </ul>
+
+        <p>En participant à notre plateforme, vous acceptez de respecter cette charte. Ensemble, faisons de ce site un espace agréable, équitable et dédié à notre passion commune : le sport et la compétition ! 😊</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+
+    <style>
+    .center-text {
+        text-align: center;
+        font-size: 1.5rem;
+        color: #ff6b6b;
+        font-weight: bold;
+        margin-top: 20px;
+        font-family: 'Arial', sans-serif;
+        background-color: #ffeaea;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .center-text:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+    body {
+            position: relative; /* Nécessaire pour positionner le pseudo-élément */
+            margin: 0;
+            padding: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'gui/Filigrane.jpg' %}") no-repeat center center;
+            background-size: cover; /* ou contain selon le besoin */
+            opacity: 0.1; /* Transparence de l'image */
+            z-index: -1; /* Met l'image en arrière-plan */
+        }
+
+        .content {
+            position: relative;
+            z-index: 2; /* Garde le contenu par-dessus */
+            background-color: rgba(255, 255, 255, 0.8); /* Optionnel */
+            padding: 20px;
+        }
+</style>
+<!--
+    <style>
+    .center-text {
+        text-align: center;
+        color: #ff6b6b; /* Couleur rouge douce pour attirer l'attention */
+        font-size: 1.5rem; /* Taille de police plus grande */
+        font-weight: bold;
+        margin-top: 2rem;
+        font-family: 'Arial', sans-serif;
+    }
+</style>
+-->
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Sport
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/tournois/default">Tout voir</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/tournois/tennis">Tennis</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/tournois/badminton">Badminton</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form class="d-flex" role="search" >
+        <input class="form-control me-2" type="search" placeholder="Rechercher un tournoi..." name="research" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Rechercher</button>
+      </form>
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+    <div class="row">
+        {% for tournoi_info in tournois_avec_sport %}
+            {% if tournoi_info.sport_type == "Tennis" %}
+                    {% if tournoi_info.fin_inscription %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="{% static 'gui/tournoi_tennis.png' %}" class="card-img-top rounded" alt="logo_tournoi" height="300">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{tournoi_info.tournoi.nom}}</h5>
+                                    <!--<h6 class="card-title">Le sport du tournoi est : {{tournoi_info.sport_type}}</h6>-->
+                                    {% if tournoi_info.match_fini %}
+                                        <h5 class="card-text" style="color:green">Les matchs ont tous été joués</h5>
+                                    {% elif tournoi_info.fin_inscription %}
+                                        <h5 class="card-text" style="color:red">Les inscriptions à ce tournoi sont cloturées</h5>
+                                    {% endif %}
+                                    <a href="{% url 'tournoi_details' tournoi_info.tournoi.idtournoi %}" class="btn btn-primary">Voir les détails du tournoi</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="{% static 'gui/tournoi_tennis.png' %}" class="card-img-top rounded" alt="logo_tournoi" height="300">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{tournoi_info.tournoi.nom}}</h5>
+                                    <!--<h6 class="card-title">Le sport du tournoi est : {{tournoi_info.sport_type}}</h6>-->
+                                    <a href="{% url 'tournoi_details' tournoi_info.tournoi.idtournoi %}" class="btn btn-primary">Voir les détails du tournoi</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            {% else %}
+                {% if tournoi_info.fin_inscription %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="{% static 'gui/tournoi_badminton.png' %}" class="card-img-top rounded" alt="logo_tournoi" height="300">
+                            <div class="card-body">
+                                <h5 class="card-title">{{tournoi_info.tournoi.nom}}</h5>
+                                <!--<h6 class="card-title">Le sport du tournoi est : {{tournoi_info.sport_type}}</h6>-->
+                                {% if tournoi_info.match_fini %}
+                                    <h5 class="card-text" style="color:green">Les matchs ont tous été joués</h5>
+                                {% elif tournoi_info.fin_inscription %}
+                                    <h5 class="card-text" style="color:red">Les inscriptions à ce tournoi sont cloturées</h5>
+                                {% endif %}
+                                <a href="{% url 'tournoi_details' tournoi_info.tournoi.idtournoi %}" class="btn btn-primary">Voir les détails du tournoi</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="{% static 'gui/tournoi_badminton.png' %}" class="card-img-top rounded" alt="logo_tournoi" height="300">
+                            <div class="card-body">
+                                <h5 class="card-title">{{tournoi_info.tournoi.nom}}</h5>
+                                <!--<h6 class="card-title">Le sport du tournoi est : {{tournoi_info.sport_type}}</h6>-->
+                                <a href="{% url 'tournoi_details' tournoi_info.tournoi.idtournoi %}" class="btn btn-primary">Voir les détails du tournoi</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% empty %}
+            <div class="center-text">
+                Aucun tournoi trouvé ; (
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

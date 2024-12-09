@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+{% block main_content %}
+    <style>
+    body {
+            position: relative; /* Nécessaire pour positionner le pseudo-élément */
+            margin: 0;
+            padding: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'gui/Filigrane.jpg' %}") no-repeat center center;
+            background-size: cover; /* ou contain selon le besoin */
+            opacity: 0.1; /* Transparence de l'image */
+            z-index: -1; /* Met l'image en arrière-plan */
+        }
+
+        .content {
+            position: relative;
+            z-index: 2; /* Garde le contenu par-dessus */
+            padding: 20px;
+        }
+    </style>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh; margin-top: -5vh;">
+    <div class="card p-4" style="width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h2 class="text-center mb-4">Vérification du code</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="code" class="form-label">Entrez le code de réinitialisation :</label>
+                <input type="text" class="form-control" name="code" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">Vérifier le code</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

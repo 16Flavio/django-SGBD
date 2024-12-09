@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+    <style>
+        .highlight {
+            background-color: rgb(147, 186, 179) !important; /* Bleu très clair avec transparence */
+        }
+        table tr.highlight td {
+            background-color: rgb(147, 186, 179); /* S'assurer que les bordures sont visibles */
+        }
+        body {
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'gui/Filigrane.jpg' %}") no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            background-color: rgba(230, 230, 230, 1); /* Gris clair */
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: rgba(200, 200, 200, 1);
+        }
+
+        input[readonly] {
+            background-color: rgba(240, 240, 240, 1);
+            border: 1px solid white;
+            color: #333;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        div.row.g-3, main.container {
+            background-color: transparent;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .custom-link {
+        color: #030e43; /* Orange vif */
+        font-weight: bold; /* Texte en gras (facultatif) */
+        text-decoration: underline; /* Souligne le lien (facultatif) */
+    }
+
+    .custom-link:hover {
+        color: #030e43; /* Couleur légèrement différente au survol */
+    }
+
+    </style>
+
+    <h1>Informations des équipes</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Equipe</th>
+                <th>Surnom</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in infos %}
+            <tr class="{% if info.joueur1.user == request.user or info.joueur2.user == request.user %}highlight{% endif %}">
+                <td rowspan="2">
+                    {{ info.equipe.nom_equipe }}
+                </td>
+                <td>
+                    <a href="{% url 'profile' info.joueur1.user.username %}" class="custom-link">
+                        {{ info.joueur1.user.username }}
+                    </a>
+                </td>
+                <td>{{ info.joueur1.user.first_name }}</td>
+                <td>{{ info.joueur1.user.last_name }}</td>
+                <td rowspan="2">{{ info.total }}</td>
+            </tr>
+            <tr class="{% if info.joueur1.user == request.user or info.joueur2.user == request.user %}highlight{% endif %}">
+                <td>
+                    <a href="{% url 'profile' info.joueur2.user.username %}" class="custom-link">
+                        {{ info.joueur2.user.username }}
+                    </a>
+                </td>
+                <td>{{ info.joueur2.user.first_name }}</td>
+                <td>{{ info.joueur2.user.last_name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Aucune équipe trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Matchs à venir</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Terrain</th>
+                <th>Equipe 1</th>
+                <th>Résultats</th>
+                <th>Equipe 2</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in matchAVenir %}
+            <tr class="{% if info.joueur11.user == request.user or info.joueur12.user == request.user or info.joueur21.user == request.user or info.joueur22.user == request.user %}highlight{% endif %}">
+                <td>{{ info.match.id_match }}</td>
+                <td>{{ info.terrain.numero_terrain }}</td>
+                <td>{{ info.equipe1.nom_equipe }}</td>
+                {% if request.user.username == info.joueur11.user.username or request.user.username == info.joueur12.user.username or request.user.username == info.joueur21.user.username or request.user.username == info.joueur22.user.username %}
+                <td>
+                    <form method="POST" action="{% url 'enregistrer_points' idTournoi=info.match.tournoi.idtournoi id_match=info.match.id_match %}">
+                        {% csrf_token %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <input type="text" name="points_1" placeholder="Points {{ info.equipe1.nom_equipe }}" style="flex: 1; text-align: left;" required>
+                            <button type="submit" style="margin: 0 10px;">Valider</button>
+                            <input type="text" name="points_2" placeholder="Points {{ info.equipe2.nom_equipe }}" style="flex: 1; text-align: right;" required>
+                        </div>
+                    </form>
+                </td>
+                {% else %}
+                <td style="text-align: center">En attente des résultats...</td>
+                {% endif %}
+                <td>{{ info.equipe2.nom_equipe }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Aucun match à venir trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Matchs joués</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Terrain</th>
+                <th>Equipe 1</th>
+                <th>Equipe 2</th>
+                <th>Gagnant</th>
+                <th>Score</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in match_fait %}
+            <tr class="{% if info.joueur11.user == request.user or info.joueur12.user == request.user or info.joueur21.user == request.user or info.joueur22.user == request.user %}highlight{% endif %}">
+                <td>{{ info.match.id_match }}</td>
+                <td>{{ info.terrain.numero_terrain }}</td>
+                <td>{{ info.equipe1.nom_equipe }}</td>
+                <td>{{ info.equipe2.nom_equipe }}</td>
+                <td>{{ info.gagnant }}</td>
+                <td>{{ info.match.score }}</td>
+                <td>{{ info.match.date_heure_match }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">Aucun match trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Informations sur les terrains</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Numéro de terrain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for terrain in liste_terrains %}
+            <tr>
+                <td>{{ terrain.numero_terrain }}</td>
+                <td>{{ terrain.commentaire }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

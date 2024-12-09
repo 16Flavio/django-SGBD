@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+    <head>
+    <meta charset="UTF-8">
+    <title>{{ tournoi.nom }}</title>
+</head>
+<body>
+<div class="d-flex justify-content-center">
+    <ul class="list-group">
+        <img src="{% static 'gui/tournoi.png' %}" class="rounded" alt="badminton_image" height="300" style="border: 5px solid black;">
+        <li class="list-group-item fs-2">{{ tournoi.nom }}</li>
+        <li class="list-group-item fs-5">Période de début : {{ tournoi.periode_debut }}</li>
+        <li class="list-group-item fs-5">Description : {{ tournoi.description }}</li>
+        <li class="list-group-item fs-5">Type : {{ tournoi.type.type }}</li>
+        {% if user.is_authenticated %}
+            {% if user_participe %}
+                {% if not is_admin %}
+                    <a class="btn btn-danger" href="{% url 'desinscription_tournoi' tournoi.idtournoi %}" style="width: 100%; padding: 10px;">Me désinscrire du tournoi</a>
+                {% endif %}
+            {% else %}
+                <a role="button" href="{% url 'inscription_tournois' tournoi.idtournoi %}" class="btn btn-success">Inscription au tournoi</a>
+            {% endif %}
+        {% endif %}
+    </ul>
+</div>
+
+<h1 style="text-align: center">Informations des joueurs inscrits au tournoi</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Surnom</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in liste_inscrits %}
+            <tr class="{% if info.user == request.user %}highlight{% endif %}">
+                <td><a href="{% url 'profile' info.user.username %}">{{ info.user.username }}</a></td>
+                <td>{{ info.user.first_name }}</td>
+                <td>{{ info.user.last_name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Aucun joueur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a role="button" href="/tournois/default" class="btn btn-secondary"> < Retour à la liste des tournois</a>
+</body>
+<style>
+    body {
+        position: relative; /* Nécessaire pour positionner le pseudo-élément */
+        margin: 0;
+        padding: 0;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("{% static 'gui/Filigrane.jpg' %}") no-repeat center center;
+        background-size: cover; /* ou contain selon le besoin */
+        opacity: 0.1; /* Transparence de l'image */
+        z-index: -1; /* Met l'image en arrière-plan */
+    }
+
+    .content {
+        position: relative;
+        z-index: 2; /* Garde le contenu par-dessus */
+        background-color: rgba(255, 255, 255, 0.8); /* Optionnel */
+        padding: 20px;
+    }
+    .list-group {
+        width: 100%;
+        max-width: 400px; /* Limite la largeur de la liste */
+        margin: 0 auto;
+    }
+
+    .list-group-item {
+        word-wrap: break-word; /* Force le retour à la ligne */
+        white-space: normal; /* Empêche le texte de s'étirer */
+        text-align: center; /* Optionnel : centrer le texte */
+        border: 1px solid #6c757d;
+    }
+
+    able {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            background-color: rgba(230, 230, 230, 1); /* Gris clair */
+            padding: 10px;
+            border: 1px solid #ddd; /* Bordure fine */
+        }
+
+        th {
+            background-color: rgba(200, 200, 200, 1); /* Gris légèrement plus foncé pour l'en-tête */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .highlight {
+            background-color: rgba(0, 123, 255, 0.3); /* Bleu clair avec opacité */
+            border: 2px solid rgba(0, 123, 255, 0.5); /* Bordure bleue semi-transparente */
+        }
+</style>
+{% endblock %}

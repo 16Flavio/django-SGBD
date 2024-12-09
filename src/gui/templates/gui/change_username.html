@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<div style="text-align: center;">
+    <h2>Modification de l'username d'un utilisateur</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Champ pour sélectionner un utilisateur -->
+        <div class="row mb-3" style="margin-top: 40px;">
+            <label for="username_avant" class="col-sm-3 offset-sm-1 col-form-label">
+                Username de l'utilisateur à modifier
+            </label>
+            <div class="col-sm-7">
+                <select class="form-control" id="username_avant" name="username_avant" required>
+                    <option value="" disabled selected>-- Sélectionnez un utilisateur --</option>
+                    {% for utilisateur in liste_utilisateurs %}
+                        <option value="{{ utilisateur.user.username }}">{{ utilisateur.user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Champ pour entrer le nouveau username -->
+        <div class="row mb-3" style="margin-top: 40px;">
+            <label for="username_changed" class="col-sm-3 offset-sm-1 col-form-label">
+                Nouveau username
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="username_changed" name="username_changed" required>
+            </div>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="d-grid gap-2">
+            <button class="btn btn-success" type="submit">Changer l'username</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

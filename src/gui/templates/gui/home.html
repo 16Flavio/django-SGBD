@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+{%  extends "gui/index.html" %}
+
+
+{%  block main_content %}
+<main role="main"></main>
+<div class="jumbotron">
+    <div class="container">
+        {% load static %}
+        <img src="{%  static 'gui/logo_detour.png' %}" class="rounded float-start" alt="logo" height="250" style="margin-right : 20px;">
+        {% if request.user.is_authenticated %}
+            <h1 class="display-4">Bonjour, {{ request.user.username }} !</h1>
+        {% else %}
+            <h1 class="display-4">Bonjour, cher joueur !</h1>
+        {% endif %}
+        <p>Bienvenue sur RAQTOUR ! Que vous soyez un as du service ou un as du sourire, cette plateforme est là pour organiser vos tournois amicaux sans prise de tête !</p>
+        <p>Planifiez, jouez, et partagez des moments inoubliables entre passionnés. À vos raquettes, prêts, partez !</p>
+        <a role="button" href="/tournois/default" class="btn btn-light btn-lg">Voir les tournois en cours</a>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Des tournois pour tous !</h2>
+            <p>Que vous soyez un débutant cherchant à s'amuser ou un compétiteur aguerri,
+                nos tournois s'adaptent à tous les niveaux.
+                Ici, chacun trouve sa place et l'occasion de briller sur le terrain,
+                tout en partageant de bons moments !</p>
+        </div>
+        <div class="col">
+            <h2>Tournois à venir</h2>
+                <p>Voici les tournois qui vont faire sensation cette semaine : </p>
+                    <ul>
+                        {% if current_sport == "Tennis" %}
+                            {% for tournoi in liste_tournois_tennis %}
+                                <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
+                            {% empty %}
+                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                            {% endfor %}
+                        {% elif current_sport == "Badminton" %}
+                            {% for tournoi in liste_tournois_badminton %}
+                                <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
+                            {% empty %}
+                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                            {% endfor %}
+                        {% else %}
+                            {% for tournoi in liste_tournois_all %}
+                                <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
+                            {% empty %}
+                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+        </div>
+        <div class="col">
+            <h2>Qui sommes-nous ?</h2>
+        <p>Chez RAQTOUR, nous sommes une communauté de passionnés de tennis et de badminton,
+            dédiée à organiser des tournois amicaux où la convivialité et la compétition se rencontrent !
+            Notre mission ? Créer des moments inoubliables, un match à la fois, pour les joueurs de tous niveaux.
+            Rejoignez-nous et faites partie de cette aventure sportive !</p>
+        </div>
+    </div>
+        <hr>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <h4 class="text-center mb-5 font-weight-bold custom-color">Contactez-nous</h4>
+
+            <form id="contact-form" method="POST" class="bg-white p-5 rounded-lg shadow-lg border">
+                {% csrf_token %}
+
+                <!-- Bloc Nom -->
+                <div class="form-group mb-4">
+                    <label for="id_name" class="font-weight-bold text-secondary">Nom</label>
+                    {{ form.nom }}
+                </div>
+
+                <!-- Bloc Email -->
+                <div class="form-group mb-4">
+                    <label for="id_email" class="font-weight-bold text-secondary">Email</label>
+                    {{ form.email }}
+                </div>
+
+                <!-- Bloc Sujet -->
+                <div class="form-group mb-4">
+                    <label for="id_subject" class="font-weight-bold text-secondary">Sujet</label>
+                    {{ form.sujet }}
+                </div>
+
+                <!-- Bloc Message -->
+                <div class="form-group mb-4">
+                    <label for="id_message" class="font-weight-bold text-secondary">Message</label>
+                    {{ form.message }}
+                </div>
+
+                <!-- Bouton d'envoi -->
+                <div class="d-flex justify-content-center">
+                   <button type="submit" class="btn btn-custom btn-lg w-50 mt-4 py-2 shadow-sm">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Appliquer le style uniquement au formulaire de contact */
+    #contact-form .form-group label {
+        font-weight: bold;
+        color: #4E96D5;
+        font-size: 1.1rem; /* Réduire la taille des labels */
+    }
+
+    #contact-form .form-control {
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        font-size: 0.6rem; /* Réduire la taille des champs de saisie */
+        padding: 0.5rem 1rem; /* Réduire le padding */
+    }
+
+    /* Style du bouton */
+    .btn-custom {
+        background-color: #4E96D5 !important; /* Bleu clair pour "Info" */
+        border-color: #4E96D5 !important; /* Même couleur pour la bordure */
+        color: #ffffff !important; /* Texte blanc */
+        font-size: 0.85rem; /* Taille du texte du bouton */
+        padding: 0.6rem 1.5rem; /* Ajuster l'espace intérieur */
+        border-radius: 0.375rem; /* Coins arrondis */
+    }
+
+    /* Effet de survol du bouton */
+    .btn-custom:hover {
+        background-color: #218838; /* Couleur du bouton sur survol (vert plus foncé) */
+        border-color: #1e7e34; /* Couleur de la bordure du bouton sur survol */
+    }
+
+    #contact-form .form-group .form-control {
+        width: 100%;
+    }
+
+    /* Réduire l'espacement intérieur du formulaire */
+    #contact-form form {
+        padding: 2rem; /* Réduire le padding intérieur */
+        border-radius: 0.5rem; /* Adoucir les coins */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre plus légère */
+    }
+    
+    /* Conteneur */
+    #contact-form .container my-5 {
+        max-width: 300px;
+        min-width: 300px ;
+        margin: 0 auto
+    }
+
+    /* Titre du formulaire */
+    #contact-form h2 {
+        font-size: 1.0rem; /* Réduire la taille du titre */
+        font-weight: 700;
+        color: #6c757d; /* Gris */
+    }
+
+    /* Ombre du formulaire */
+    #contact-form .shadow-lg {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Espacement entre les blocs du formulaire */
+    #contact-form .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Ajuster l'apparence du bouton */
+    #contact-form .btn-custom {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .custom-color {
+        color: #6c757d; /* Gris clair */
+    }
+</style>
+
+
+</div>
+</main>
+<footer class="container">
+    <p>©Equipe RAQTOUR</p>
+</footer>
+{% endblock %}

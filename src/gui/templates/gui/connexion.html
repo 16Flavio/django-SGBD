@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-danger{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% block main_content %}
+    <div class="full-height d-flex justify-content-center align-items-center">
+        <div class="container text-center" style="background-color: #f0f0f0; padding: 20px; border-radius: 8px;">
+            <div class="row justify-content-center mb-4">
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="container" style="overflow-y: auto; height: 400px; background: #f0f0f0; border-radius: 8px; padding: 20px;">
+                        <form onsubmit="return validateForm()" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <table class="table text-center">
+                                <tr>
+                                    <td style="text-align: right; vertical-align: middle; padding-right: 15px;">Username : </td>
+                                    <td><input type="text" class="form-control" name="utilisateur_username" id="inputUsername"></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right; vertical-align: middle; padding-right: 15px;">Mot de passe :</td>
+                                    <td><input type="password" class="form-control" name="utilisateur_mdp" id="inputPassword"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">
+                                        <input type="checkbox" id="showPasswordCheckbox" onclick="togglePassword()"> Afficher le mot de passe
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">
+                                        <button class="btn btn-primary" type="submit">Se connecter</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">
+                                        <a href="/changepassword"> Mot de passe oublié ? Récupérez le</a>
+                                    </td>
+                                </tr>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Vous n'êtes pas encore inscrit?</h5>
+                                        <p class="card-text">Inscrivez-vous</p>
+                                        <a href="/inscription" class="btn btn-primary">Inscription</a>
+                                    </div>
+                                </div>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById("inputPassword");
+            var checkbox = document.getElementById("showPasswordCheckbox");
+            if (checkbox.checked) {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        }
+    </script>
+{% endblock %}
+

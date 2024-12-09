@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annulation de tournoi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #007BFF;
+        }
+        .content {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .code {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007BFF;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Annulation de tournoi</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour <strong>{{ user.username }}</strong>,</p>
+            <p>Le tournoi a été annulé car peu de gens se sont inscrit au tournoi, voici la liste des inscrits :</p>
+            {% for inscrit in liste_inscrit %}
+                <div>{{ inscrit.user.username }}</div>
+            {% empty %}
+                <div>Aucun joueur inscrit au tournoi !</div>
+            {% endfor %}
+            <p>Merci de nous faire confiance.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; RAQTOUR Service</p>
+            <p>service.raqtour@gmail.com</p>
+        </div>
+    </div>
+</body>
+</html>

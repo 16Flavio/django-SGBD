@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<h1 class="calendar-title">Calendrier de {{ month_name }} {{ year }}</h1>
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+
+        /* Styles de base pour le corps */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .calendar-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: steelblue;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Formulaire de sélection */
+        .calendar-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-form select {
+            padding: 8px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .calendar-day, .calendar-empty {
+            width: 14.28%;
+            height: 100px;
+            text-align: center;
+            vertical-align: top;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .calendar-day {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s;
+        }
+
+        .calendar-day:hover {
+            background-color: #e6f7ff;
+            cursor: pointer;
+        }
+
+        /* Cellules vides */
+        .calendar-empty {
+            background-color: #f1f1f1;
+        }
+
+        /* Styles pour les week-ends */
+        .calendar-weekend {
+            background-color: #ffe6e6;
+            color: #d9534f;
+        }
+    </style>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form method="get" action="{% url 'calendrier' %}" class="calendar-form">
+            <!-- Champ caché pour conserver le mois sélectionné -->
+            <input type="hidden" name="month" value="{{ month }}">
+            <!-- Champ caché pour conserver l'année sélectionnée -->
+            <input type="hidden" name="year" value="{{ year }}">
+            <!-- Sélection du filtre -->
+            <select name="tri" onchange="this.form.submit()">
+                <!--<option value="" >Filtre</option>-->
+                {% if request.user.is_authenticated %}
+                    <option value="perso" {% if request.GET.tri == "perso" %}selected{% endif %}>Mes matchs</option>
+                {% endif %}
+                <option value="all" {% if request.GET.tri == "all" %}selected{% endif %}>Tous</option>
+                <option value="Tennis" {% if request.GET.tri == "Tennis" %}selected{% endif %}>Tennis</option>
+                <option value="Badminton" {% if request.GET.tri == "Badminton" %}selected{% endif %}>Badminton</option>
+            </select>
+        </form>
+    </div>
+  </div>
+</nav>
+
+</head>
+
+<form method="get" action="{% url 'calendrier' %}" class="calendar-form">
+    <!-- Champ caché pour conserver le filtre sélectionné -->
+    <input type="hidden" name="tri" value="{{ request.GET.tri }}">
+    <!-- Sélection du mois -->
+    <select name="month" onchange="this.form.submit()">
+        {% for m in months_list %}
+            <option value="{{ forloop.counter }}" {% if forloop.counter == month %}selected{% endif %}>
+                {{ m }}
+            </option>
+        {% endfor %}
+    </select>
+    <!-- Sélection de l'année -->
+    <select name="year" onchange="this.form.submit()">
+        {% for year_option in years %}
+            <option value="{{ year_option }}" {% if year_option == year %}selected{% endif %}>
+                {{ year_option }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th class="calendar-header">Lun</th>
+            <th class="calendar-header">Mar</th>
+            <th class="calendar-header">Mer</th>
+            <th class="calendar-header">Jeu</th>
+            <th class="calendar-header">Ven</th>
+            <th class="calendar-header">Sam</th>
+            <th class="calendar-header">Dim</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Début de la ligne de calendrier -->
+<tr>
+
+<!-- Jours vides avant le début du mois -->
+{% for _ in empty_before %}
+    <td class="calendar-empty"></td>
+{% endfor %}
+
+{% for day in empty_after %}
+    <td class="calendar-day">{{ day }}</td>
+{% endfor %}
+</tr><tr>
+<!-- Jours du mois -->
+{% for day in days %}
+    <td class="calendar-day">
+        {{ day }}
+        <!-- Afficher les matchs associés -->
+        {% for match in liste_matchs %}
+            {% if match.date_heure_match.day == day and match.date_heure_match.month == month and match.date_heure_match.year == year %}
+                <div class="match">
+                    <a href="{% url 'tournoi_details' match.tournoi.idtournoi %}">{{ match.tournoi.nom }} {{ match.date_heure_match|date:"H:i" }}</a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </td>
+
+    <!-- Si c'est le 7e jour, fermez la ligne et commencez une nouvelle ligne -->
+    {% if forloop.counter0|add:1|divisibleby:7 %}
+        </tr><tr>
+    {% endif %}
+{% endfor %}
+
+<!-- Terminer la dernière ligne -->
+</tr>
+
+    </tbody>
+</table>
+{% endblock %}
+

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<div style="text-align: center;">
+    <h2>Modification du score d'un match</h2>
+
+    <!-- Formulaire de sélection du tournoi -->
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row mb-3" style="margin-top: 40px;">
+            <label for="tournoi" class="col-sm-3 offset-sm-1 col-form-label">
+                Choisissez un tournoi
+            </label>
+            <div class="col-sm-7">
+                <select class="form-control" name="tournoi" id="tournoi" onchange="this.form.submit()">
+                    <option value="" disabled selected>-- Sélectionnez un tournoi --</option>
+                    {% for tournoi in tournois %}
+                        <option value="{{ tournoi.idtournoi }}" {% if selected_tournoi and tournoi.idtournoi == selected_tournoi.idtournoi %}selected{% endif %}>
+                            {{ tournoi.nom }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Affichage des matchs si un tournoi est sélectionné -->
+    {% if matchs %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="tournoi" value="{{ selected_tournoi.idtournoi }}">
+        <div class="row mb-3" style="margin-top: 40px;">
+            <label for="match" class="col-sm-3 offset-sm-1 col-form-label">
+                Choisissez un match
+            </label>
+            <div class="col-sm-7">
+                <select class="form-control" name="match" id="match" onchange="this.form.submit()">
+                    <option value="" disabled selected>-- Sélectionnez un match --</option>
+                    {% if type_tournoi == "Simple" %}
+                        {% for match in matchs %}
+                            <option value="{{ match.match.id_match }}" {% if selected_match and match.match.id_match == selected_match.id_match %}selected{% endif %}>
+                                {{ match.participant1.user.username }} vs {{ match.participant2.user.username }}
+                            </option>
+                        {% endfor %}
+                    {% elif type_tournoi == "Double" %}
+                        {% for match in matchs %}
+                            <option value="{{ match.match.id_match }}" {% if selected_match and match.match.id_match == selected_match.id_match %}selected{% endif %}>
+                                {{ match.participant1.nom_equipe }} vs {{ match.participant2.nom_equipe }}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- Formulaire pour changer les scores si un match est sélectionné -->
+    {% if selected_match %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="tournoi" value="{{ selected_tournoi.idtournoi }}">
+        <input type="hidden" name="match" value="{{ selected_match.id_match }}">
+        <div class="row mb-3" style="margin-top: 40px;">
+            {% if type_tournoi == "Simple" %}
+                <p class="col-sm-12">Match sélectionné :
+                    <strong>{{ participant1.user.username }} vs {{ participant2.user.username }}</strong>
+                </p>
+                <label for="score1" class="col-sm-3 offset-sm-1 col-form-label">
+                    Score de {{ participant1.user.username }}
+                </label>
+                <div class="col-sm-7">
+                    <input type="number" class="form-control" name="score1" id="score1" value="0" required>
+                </div>
+
+                <label for="score2" class="col-sm-3 offset-sm-1 col-form-label" style="margin-top: 20px;">
+                    Score de {{ participant2.user.username }}
+                </label>
+                <div class="col-sm-7">
+                    <input type="number" class="form-control" name="score2" id="score2" value="0" required>
+                </div>
+            {% elif type_tournoi == "Double" %}
+                <p class="col-sm-12">Match sélectionné :
+                    <strong>{{ participant1.nom_equipe }} vs {{ participant2.nom_equipe }}</strong>
+                </p>
+                <label for="score1" class="col-sm-3 offset-sm-1 col-form-label">
+                    Score de {{ participant1.nom_equipe }}
+                </label>
+                <div class="col-sm-7">
+                    <input type="number" class="form-control" name="score1" id="score1" value="0" required>
+                </div>
+
+                <label for="score2" class="col-sm-3 offset-sm-1 col-form-label" style="margin-top: 20px;">
+                    Score de {{ participant2.nom_equipe }}
+                </label>
+                <div class="col-sm-7">
+                    <input type="number" class="form-control" name="score2" id="score2" value="0" style="margin-top: 20px;" required>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="d-grid gap-2">
+            <button class="btn btn-success" type="submit">Mettre à jour le score</button>
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- Message de confirmation -->
+    {% if message %}
+    <p class="col-sm-12" style="color: green; margin-top: 20px;">{{ message }}</p>
+    {% endif %}
+</div>
+{% endblock %}

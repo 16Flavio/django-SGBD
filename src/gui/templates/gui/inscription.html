@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<div style="text-align: center;">
+    <h2>Inscription à RAQTOUR</h2>
+</div>
+
+<form onsubmit="return validateForm()" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row mb-3" style="margin-top: 40px;">
+    <label for="inputUsername" class="col-sm-3 offset-sm-1 col-form-label">Username</label>
+    <div class="col-sm-7">
+      <input type="text" class="form-control" id="inputUsername" name="username" required>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputName" class="col-sm-3 offset-sm-1 col-form-label">Nom</label>
+    <div class="col-sm-7">
+      <input type="text" class="form-control" id="inputName" name="last_name" required>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputFirstName" class="col-sm-3 offset-sm-1 col-form-label">Prénom</label>
+    <div class="col-sm-7">
+      <input type="text" class="form-control" id="inputFirstName" name="first_name" required>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputSex" class="col-sm-3 offset-sm-1 col-form-label">Sexe</label>
+    <div class="col-sm-7">
+      <select id="inputSex" class="form-select" name="sex" required>
+        <option selected>Veuillez choisir...</option>
+        <option value="Femme">Femme</option>
+        <option value="Homme">Homme</option>
+      </select>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputSport" class="col-sm-3 offset-sm-1 col-form-label">Sport</label>
+    <div class="col-sm-7">
+      <select id="inputSport" class="form-select" name="sport" required>
+        <option selected>Veuillez choisir...</option>
+        <option value="Tennis">Tennis</option>
+        <option value="Badminton">Badminton</option>
+      </select>
+    </div>
+  </div>
+  <div class="row mb-3">
+      <label for="inputlevel" class="col-sm-3 offset-sm-1 col-form-label">Niveau</label>
+      <div class="col-sm-7">
+          <select id="inputlevel" class="form-select" name="niveau" required>
+            <option selected>Veuillez choisir...</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+          <div id="inputlevelHelpBlock" class="form-text">
+                Votre niveau peut être modifié ultérieurement.*
+          </div>
+      </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputEmail" class="col-sm-3 offset-sm-1 col-form-label">Email</label>
+    <div class="col-sm-7">
+      <input type="email" class="form-control" id="inputEmail" name="email" required>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputPassword" class="col-sm-3 offset-sm-1 col-form-label">Mot de passe</label>
+    <div class="col-sm-5">
+      <input type="password" class="form-control" id="inputPassword" name="password1" required>
+      <div id="passwordHelpBlock" class="form-text">
+        Votre mot de passe doit contenir 8-20 caractères, des lettres et des chiffres, sans espaces ni caractères spéciaux.
+      </div>
+      <div id="passwordError" class="text-danger" style="display: none;">
+        Le mot de passe ne respecte pas les critères requis.
+      </div>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="showPasswordCheckbox" onclick="togglePassword()">
+        <label class="form-check-label" for="showPasswordCheckbox">Afficher le mot de passe</label>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputPasswordConfirm" class="col-sm-3 offset-sm-1 col-form-label">Confirmer votre mot de passe</label>
+    <div class="col-sm-5">
+      <input type="password" class="form-control" id="inputPasswordConfirm" name="password2" required>
+      <div id="confirmPasswordError" class="text-danger" style="display: none;">
+        Les mots de passe ne correspondent pas.
+      </div>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-sm-10 offset-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="gridCheck1" required>
+        <label class="form-check-label" for="gridCheck1">
+          *J'accepte la <a href="#" data-bs-toggle="modal" data-bs-target="#charteModal">charte de RAQTOUR</a>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="d-grid gap-2">
+    <button class="btn btn-success" type="submit">Confirmer l'inscription</button>
+  </div>
+</form>
+
+<!-- Modale pour afficher la charte -->
+<div class="modal fade" id="charteModal" tabindex="-1" aria-labelledby="charteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="charteModalLabel">Charte RAQTOUR</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h2>Bienvenue sur notre site dédié à la gestion des tournois amicaux !</h2>
+        <p>Afin de garantir une expérience agréable et équitable pour tous, nous avons établi une charte de conduite que chaque utilisateur s’engage à respecter.</p>
+
+        <h3>1. Respect et Fair-play</h3>
+        <ul>
+          <li>Le respect mutuel est essentiel : adoptez une attitude bienveillante envers les autres joueurs, arbitres, et administrateurs.</li>
+          <li>Les comportements irrespectueux, insultes ou discriminations de toute nature ne seront pas tolérés.</li>
+          <li>Jouez dans un esprit de fair-play : respectez les règles du jeu et acceptez les décisions prises.</li>
+        </ul>
+
+        <h3>2. Gestion des Matchs</h3>
+        <ul>
+          <li>Les matchs doivent être organisés dans le respect des règles et des horaires établis.</li>
+          <li>Toute demande de modification ou d’annulation doit être signalée aux administrateurs en amont.</li>
+          <li>Veillez à entrer les résultats correctement et honnêtement.</li>
+        </ul>
+
+        <h3>3. Communication</h3>
+        <p>Pour toute question ou problème, n’hésitez pas à nous contacter via les moyens indiqués.</p>
+
+        <h3>4. Administration</h3>
+        <ul>
+          <li>Si vous souhaitez devenir administrateur, contactez-nous via le formulaire de contact ou par e-mail.</li>
+          <li>Les administrateurs se réservent le droit de modérer les contenus et de sanctionner les comportements inappropriés.</li>
+        </ul>
+
+        <h3>5. Sanctions</h3>
+        <ul>
+          <li>Tout manquement à cette charte peut entraîner :</li>
+          <ul>
+            <li>Un avertissement.</li>
+            <li>Une suspension temporaire.</li>
+            <li>Une exclusion définitive en cas de récidive ou de faute grave.</li>
+          </ul>
+        </ul>
+
+        <p>En participant à notre plateforme, vous acceptez de respecter cette charte. Ensemble, faisons de ce site un espace agréable, équitable et dédié à notre passion commune : le sport et la compétition ! 😊</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+ function validateForm() {
+    const password = document.getElementById("inputPassword").value;
+    const confirmPassword = document.getElementById("inputPasswordConfirm").value;
+    const passwordError = document.getElementById("passwordError");
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
+
+    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+
+    let isValid = true;
+
+    if (!passwordPattern.test(password)) {
+      passwordError.style.display = "block";
+      isValid = false;
+    } else {
+      passwordError.style.display = "none";
+    }
+
+    if (password !== confirmPassword) {
+      confirmPasswordError.style.display = "block";
+      isValid = false;
+    } else {
+      confirmPasswordError.style.display = "none";
+    }
+
+    return isValid;
+  }
+function togglePassword() {
+    var passwordField = document.getElementById("inputPassword");
+    var confirmPasswordField = document.getElementById("inputPasswordConfirm");
+    var checkbox = document.getElementById("showPasswordCheckbox");
+    
+    if (checkbox.checked) {
+        passwordField.type = "text";
+        confirmPasswordField.type = "text";
+    } else {
+        passwordField.type = "password";
+        confirmPasswordField.type = "password";
+    }
+}
+</script>
+{% endblock %}

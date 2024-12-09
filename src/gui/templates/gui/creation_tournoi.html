@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+{% extends "gui/index.html" %}
+{% load static %}
+
+{% block main_content %}
+<div style="text-align: center;">
+    <h2>Création d'un tournoi</h2>
+</div>
+
+<form onsubmit="return validateForm()" method="POST" enctype="multipart/form-data" >
+  {% csrf_token %}
+  <div class="row mb-3" style="margin-top: 40px;">
+    <label for="inputTournamentName" class="col-sm-3 offset-sm-1 col-form-label">Nom du tournoi</label>
+    <div class="col-sm-7">
+      <input type="text" class="form-control" id="inputTournamentName" name="TournamentName" required>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputDescription" class="col-sm-3 offset-sm-1 col-form-label">Description du tournoi</label>
+    <div class="col-sm-7">
+      <textarea class="form-control" id="inputDescription" name="description" rows="3" required></textarea>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <label for="inputType" class="col-sm-3 offset-sm-1 col-form-label">Type de tournoi </label>
+    <div class="col-sm-7">
+      <select id="inputType" class="form-select" name="type" required>
+        <option selected>Veuillez choisir...</option>
+        <option value="Simple mixte">Simple mixte</option>
+        <option value="Simple hommes">Simple hommes</option>
+        <option value="Simple dames">Simple dames</option>
+        <option value="Double mixte">Double mixte</option>
+        <option value="Double hommes">Double hommes</option>
+        <option value="Double dames">Double dames</option>
+      </select>
+    </div>
+  </div>
+  <div class="row mb-3">
+          <label for="inputDateBegin" class="col-sm-3 offset-sm-1 col-form-label">Date de début </label>
+          <div class="col-sm-7">
+            <input type="date" class="form-control" id="inputDateBegin" name="dateDebut" required>
+          </div>
+  </div>
+
+    <div class="row mb-3">
+    <label for="inputNumTerrains" class="col-sm-3 offset-sm-1 col-form-label">Nombre de terrains</label>
+    <div class="col-sm-7">
+        <input type="number" class="form-control" id="inputNumTerrains" name="numTerrains" min="1" required>
+    </div>
+</div>
+<div id="terrainFieldsContainer"></div>
+
+    <div class="d-grid gap-2">
+    <button class="btn btn-success" type="submit">Créer le tournoi</button>
+  </div>
+</form>
+    <script>
+  function validateForm() {
+    // Récupère la date d'aujourd'hui et ajoute 10 jours
+    const today = new Date();
+    today.setDate(today.getDate() + 10); // Ajouter 10 jours
+    const futureDate = today.toISOString().split('T')[0];
+
+    // Récupère les valeurs de la date de début et de la date de fin
+    const dateDebut = document.getElementById("inputDateBegin").value;
+
+    // Vérifie si la date de début est avant aujourd'hui
+    if (dateDebut < futureDate) {
+      alert('La date de début doit être supérieure ou égale à cette date : ' + futureDate);
+      return false; // Empêche l'envoi du formulaire
+    }
+
+    return true; // Permet l'envoi du formulaire si tout est valide
+  }
+
+  // Écouteur pour détecter le changement du nombre de terrains
+  document.getElementById("inputNumTerrains").addEventListener("input", function () {
+    const numTerrains = parseInt(this.value);
+    const container = document.getElementById("terrainFieldsContainer");
+
+    // Efface les anciens champs
+    container.innerHTML = "";
+
+    if (numTerrains > 0) {
+      for (let i = 1; i <= numTerrains; i++) {
+        const fieldHTML = `
+          <div class="row mb-3">
+            <label for="terrainNumber${i}" class="col-sm-3 offset-sm-1 col-form-label">Numéro du terrain ${i}</label>
+            <div class="col-sm-3">
+              <input type="number" class="form-control" id="terrainNumber${i}" name="terrainNumber${i}" min="1" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="terrainDirections${i}" class="col-sm-3 offset-sm-1 col-form-label">Indications</label>
+            <div class="col-sm-3">
+              <textarea class="form-control" id="terrainDirections${i}" name="terrainDirections${i}" rows="2" required></textarea>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML("beforeend", fieldHTML);
+      }
+    }
+  });
+
+</script>
+{% endblock %}
