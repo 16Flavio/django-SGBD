@@ -168,6 +168,37 @@ def inscription_tournois(request,idtournoi):
             utili.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
             equipier.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
 
+        user1 = Utilisateur.objects.get(equipe=Equipe.objects.get(nom_equipe=TeamName))[0]
+        email1 = user1.user.email
+        user2 = Utilisateur.objects.get(equipe=Equipe.objects.get(nom_equipe=TeamName))[1]
+        email2 = user1.user.email
+
+        html_message = render_to_string('gui/tournoi_inscription_double.html', {
+            'user1': user1,  # Passer l'utilisateur pour le personnaliser dans le template
+            'user2' : user2,
+            'equipe' : Equipe.objects.get(nom_equipe=TeamName),
+            'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+            'tournoi' : Tournoi.objects.get(idtournoi=idtournoi),
+        })
+        send_mail(
+            f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+            "Ceci est un message automatique.",
+            # Message texte brut (en cas de problème avec HTML)
+            'service.raqtour@gmail.com',  # Ton adresse e-mail
+            [email1],  # Adresse de l'utilisateur
+            html_message=html_message,  # Corps HTML de l'email
+            fail_silently=False
+        )
+        send_mail(
+            f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+            "Ceci est un message automatique.",
+            # Message texte brut (en cas de problème avec HTML)
+            'service.raqtour@gmail.com',  # Ton adresse e-mail
+            [email2],  # Adresse de l'utilisateur
+            html_message=html_message,  # Corps HTML de l'email
+            fail_silently=False
+        )
+
         messages.success(request, "Votre inscription et celle de votre coéquipier ont bien été effectuée")
         return redirect("home")
     return render(request, 'gui/inscription_tournois.html', context={"liste_equipes" : liste_equipes, "liste_teammates" : liste_teammates,"current_sport": current_sport,'tournoi': tournoi, "is_admin" : is_admin, "current_tab" : "tournois"})
@@ -200,6 +231,21 @@ def page_inscription_tournoi(request, idtournoi):
             messages.error(request, "Vous devez être un homme pour participer à ce tournoi! ")
             return redirect('tournoi_details', idtournoi=idtournoi)
         messages.success(request, "Votre inscription a bien été effectuée")
+
+        html_message = render_to_string('gui/tournoi_inscription_simple.html', {
+            'user': user,
+            'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+            'tournoi': Tournoi.objects.get(idtournoi=idtournoi),
+        })
+        send_mail(
+            f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+            "Ceci est un message automatique.",
+            # Message texte brut (en cas de problème avec HTML)
+            'service.raqtour@gmail.com',  # Ton adresse e-mail
+            [user.user.email],  # Adresse de l'utilisateur
+            html_message=html_message,  # Corps HTML de l'email
+            fail_silently=False
+        )
 
         Utilisateur.objects.get(user=request.user).tournoi.add(tournoi)
 
@@ -1606,6 +1652,16 @@ def desinscription_tournoi(request, idtournoi):
     tournoi = get_object_or_404(Tournoi, idtournoi=idtournoi)
     if tournoi.type.type[:6] == "Simple":
         Utilisateur.objects.get(user=request.user).tournoi.delete(tournoi)
+        html_content = render_to_string('gui/email_desinscription_simple.html',
+                                        {'tournoi': tournoi})
+        send_mail(
+            f'Désinscription au tournoi {tournoi.nom}',
+            f'Bonjour {request.user.username}, vous avez été désinscrits avec succès',
+            'service.raqtour@gmail.com',
+            [request.user.email],
+            fail_silently=False,
+            html_message=html_content
+        )
     elif tournoi.type.type[:6] == "Double":
         liste_equipes = Utilisateur.objects.get(user=request.user).equipe.all()
         for equipe_inscrit in liste_equipes:
@@ -1972,4 +2028,3 @@ def supprimer_utilisateur_admin(request):
         "current_tab": "administration",
         "utilisateurs": utilisateurs  # Passer les utilisateurs à la vue
     })
-
