@@ -14,16 +14,16 @@
         <h2>Inscription au tournoi {{ tournoi.nom }}</h2>
     </div>
 
-    <form onsubmit="return validateForm()" method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row mb-3" style="margin-top: 40px;">
-            <label for="selectTeam" class="col-sm-3 offset-sm-1 col-form-label">Sélectionner une équipe</label>
+            <label for="selectedTeam" class="col-sm-3 offset-sm-1 col-form-label">Sélectionner une équipe</label>
             <div class="col-sm-7">
-                <select class="form-control" id="selectTeam" name="selectedTeam" onchange="toggleNewTeamForm(this)">
-                    <option>Choisissez une équipe</option>
+                <select class="form-control" id="selectedTeam" name="selectedTeam" onchange="toggleNewTeamForm(this)">
+                    <option value="default">Choisissez une équipe</option>
                     <option value="">Créer une nouvelle équipe</option>
                     {% for equipe in liste_equipes %}
-                        <option value="{{ equipe.nom_equipe }}">{{ equipe.nom_equipe }}</option>
+                        <option value="{{ equipe.equipe.nom_equipe }}">{{ equipe.equipe.nom_equipe }} - {{ equipe.equipier.user.username }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -31,13 +31,13 @@
 
         <div id="newTeamForm" style="display: none;">
             <div class="row mb-3" style="margin-top: 40px;">
-                <label for="inputTeamName" class="col-sm-3 offset-sm-1 col-form-label">Nom de l'équipe</label>
-                <div class="col-sm-7">
-                    <input type="text" class="form-control" id="inputTeamName" name="teamName">
-                </div>
+            <label for="inputTeamName" class="col-sm-3 offset-sm-1 col-form-label">Nom de l'équipe</label>
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control" id="inputTeamName" name="teamName">
+                    </div>
             </div>
             <div class="row mb-3" style="margin-top: 40px;">
-                <label for="inputTeamMate" class="col-sm-3 offset-sm-1 col-form-label">Username de votre coéquipier</label>
+            <label for="inputTeamMate" class="col-sm-3 offset-sm-1 col-form-label">Username de votre coéquipier</label>
                 <div class="col-sm-7">
                     <select class="form-control" id="inputTeamMate" name="teamMate">
                         {% for teammate in liste_teammates %}
@@ -104,10 +104,17 @@
     <script>
         function toggleNewTeamForm(selectElement) {
             const newTeamForm = document.getElementById('newTeamForm');
-            if (selectElement.value === "") {
+            const teamNameInput = document.getElementById('inputTeamName');
+            const teamMateInput = document.getElementById('inputTeamMate');
+
+            if (selectElement.value === "") { // Si "Créer une nouvelle équipe" est choisi
                 newTeamForm.style.display = "block";
+                teamNameInput.setAttribute("required", "required");
+                teamMateInput.setAttribute("required", "required");
             } else {
                 newTeamForm.style.display = "none";
+                teamNameInput.removeAttribute("required");
+                teamMateInput.removeAttribute("required");
             }
         }
     </script>

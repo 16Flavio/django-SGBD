@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue dans la communauté RAQTOUR</title>
+    <title>Confirmation d'inscription au tournoi {{ tournoi.nom }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,14 +51,15 @@
 
     <div class="container">
         <div class="header">
-            <h1>Bienvenue sur RAQTOUR !</h1>
+            <h1>Confirmation d'inscription au tournoi !</h1>
         </div>
 
         <div class="content">
-            <p>Félicitations, vous avez rejoint la communauté RAQTOUR !</p>
-            <p>Nous sommes ravis de vous avoir parmi nous. Si vous voyez ce message, cela signifie que votre inscription a été réalisée avec succès.</p>
-            <p>Pour commencer à participer à des tournois, cliquez sur le bouton ci-dessous :</p>
-            <a href="{{ site_url }}" class="button">Commencer</a>
+            <p>Par ce mail nous confirmons votre inscription au tournoi {{ tournoi.nom }} sous le nom d'équipe : {{ equipe.nom_equipe }}</p>
+            <p>Les membres de l'équipe sont :</p>
+            <p>{{ user1.user.username }}</p>
+            <p>{{ user2.user.username }}</p>
+            <a href="{{site_url}}" class="button">Commencer</a>
         </div>
 
         <div class="footer">

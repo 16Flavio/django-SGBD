@@ -1,11 +1,9 @@
 import random
 from typing import Match
-
 from django.contrib.auth.hashers import make_password
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import make_aware
-
 from .models import *
 from gui.models import Utilisateur, Tournoi
 from django.contrib.auth.models import User
@@ -18,7 +16,6 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseNotFound
 from .forms import ContactForm
 from django.conf import settings
-
 # Create your views here.
 def home(request):
     if request.user.is_authenticated:
@@ -26,9 +23,7 @@ def home(request):
     else:
         current_sport = None
     is_admin = request.user.groups.filter(name="Administrateurs").exists()
-
     form = ContactForm()
-
     # Si le formulaire est soumis
     if request.method == 'POST':
         form = ContactForm(request.POST)
@@ -47,7 +42,6 @@ def home(request):
                 fail_silently=False,
             )
             return render(request, 'gui/success.html', {"current_sport":current_sport,"current_tab" : "home" , "is_admin": is_admin})
-
     aujourdhui = datetime.now().date()
     liste_tournois_tennis = []
     liste_tournois_badminton = []
@@ -63,12 +57,6 @@ def home(request):
             elif Utilisateur.objects.filter(tournoi=tournoi, user__groups__name="Administrateurs").first().sport_type.sport_type == "Badminton":
                 liste_tournois_badminton.append(tournoi)
     return render(request, 'gui/home.html', context={ 'form': form,"liste_tournois_all" : liste_tournois_all,"liste_tournois_badminton":liste_tournois_badminton,"liste_tournois_tennis":liste_tournois_tennis,"current_sport":current_sport,"current_tab" : "home" , "is_admin": is_admin})
-
-'''
-def calendrier(request):
-    is_admin = request.user.groups.filter(name="Administrateur").exists()
-    return render(request, 'gui/calendrier.html', context={"current_tab" : "calendrier", "is_admin" : is_admin })
-'''
 def save_customer(request):
     if request.user.is_authenticated:
         current_sport = Utilisateur.objects.get(user=request.user).sport_type.sport_type
@@ -99,9 +87,9 @@ def inscription_tournois(request,idtournoi):
     for equipe in userConnected.equipe.all():
         joueur1 = Utilisateur.objects.filter(equipe=equipe)[0]
         joueur2 = Utilisateur.objects.filter(equipe=equipe)[1]
-        if joueur1.user.groups.name == "Supprimé" or joueur2.user.groups.name == "Supprimé":
-            continue
-        liste_equipes.append(equipe)
+        if not (Utilisateur.objects.filter(equipe=equipe, user__groups__name="Supprimé").exists()):
+            equipier = Utilisateur.objects.filter(equipe=equipe).exclude(user=Use).first()
+            liste_equipes.append({"equipe":equipe, "equipier":equipier})
     if tournoi.type.type == "Double mixte":
         liste_teammates = Utilisateur.objects.filter(sport_type=userConnected.sport_type).exclude(sexe=userConnected.sexe).exclude(user=userConnected.user).exclude(user__groups__name="Administrateurs").exclude(user__groups__name="Supprimé").exclude(equipe__tournoi=tournoi)
     elif tournoi.type.type == "Double dames":
@@ -118,7 +106,28 @@ def inscription_tournois(request,idtournoi):
                 return render(request, 'gui/inscription_tournois.html', context={"liste_equipes" : liste_equipes, "liste_teammates" : liste_teammates,"current_sport": current_sport,'tournoi': tournoi, "is_admin" : is_admin,"current_tab" : "tournois"})
             elif Equipe.objects.filter(nom_equipe=TeamName).exists() and Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName), user__username=usernameTeamMate).exists():
                 Equipe.objects.get(nom_equipe=TeamName).tournoi.add(tournoi)
-                messages.success(request, "Votre inscription et celle de votre coéquipier ont bien été effectuée")
+                messages.success(request, "Votre inscription et celle de votre coéquipier(e) ont bien été effectuée")
+                user1 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[0]
+                email1 = user1.user.email
+                user2 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[1]
+                email2 = user1.user.email
+
+                html_message = render_to_string('gui/tournoi_inscription_double.html', {
+                    'user1': user1,  # Passer l'utilisateur pour le personnaliser dans le template
+                    'user2' : user2,
+                    'equipe' : Equipe.objects.get(nom_equipe=TeamName),
+                    'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+                    'tournoi' : Tournoi.objects.get(idtournoi=idtournoi),
+                })
+                send_mail(
+                    f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+                    "Ceci est un message automatique.",
+                    # Message texte brut (en cas de problème avec HTML)
+                    'service.raqtour@gmail.com',  # Ton adresse e-mail
+                    [email1,email2],  # Adresse de l'utilisateur
+                    html_message=html_message,  # Corps HTML de l'email
+                    fail_silently=False
+                )
                 return redirect("home")
             if not User.objects.filter(username=usernameTeamMate).exists():
                 messages.error(request, "Ce nom d'utilisateur n'existe pas! Veuillez entrez le bon username ou demander à votre coéquipier de s'inscire ! ")
@@ -142,33 +151,70 @@ def inscription_tournois(request,idtournoi):
                     return render(request, 'gui/inscription_tournois.html', context={"liste_equipes" : liste_equipes, "liste_teammates" : liste_teammates,"current_sport": current_sport,'tournoi': tournoi, "is_admin": is_admin,"current_tab" : "tournois"})
         elif request.POST.get('selectedTeam') != '':
             TeamName = request.POST.get('selectedTeam')
-        """
-        if tournoi.type.type not in ["Double mixtes", "Double dames", "Double hommes"] :
-            messages.success(request, "Votre inscription a bien été effectuée")
-            return redirect('tournoi_details', idtournoi=idtournoi)
-        """
-        """
-        if Utilisateur.objects.get(user=Use).tournoi.filter(idtournoi=idtournoi).exists():
-            messages.error(request,"Vous êtes déja inscrit à ce tournoi! ")
-            return redirect('tournoi_details', idtournoi=idtournoi)
-        """
-        if Equipe.objects.filter(nom_equipe=TeamName).exists():
-            Equipe.objects.get(nom_equipe=TeamName).tournoi.add(tournoi)
-        else:
-            team = Equipe(nom_equipe=TeamName)
-            team.save()
+            equipe = Equipe.objects.get(nom_equipe=TeamName)
+            equipe.tournoi.add(tournoi)  # Ajout de l'équipe au tournoi
+            messages.success(request, "Votre inscription avec l'équipe existante a bien été effectuée.")
 
-            utili = Utilisateur.objects.get(user=Use)
-            if utili.user.is_active or utili.user.groups.filter(name="Supprimé").exists():
-                utili.equipe.add(team)
-            equipier = Utilisateur.objects.get(user=User.objects.get(username=usernameTeamMate))
-            if equipier.user.is_active or equipier.user.groups.filter(name="Supprimé").exists():
-                equipier.equipe.add(team)
-            Equipe.objects.get(nom_equipe=TeamName).tournoi.add(tournoi)
-            utili.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
-            equipier.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
+            user1 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[0]
+            email1 = user1.user.email
+            user2 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[1]
+            email2 = user1.user.email
 
-        messages.success(request, "Votre inscription et celle de votre coéquipier ont bien été effectuée")
+            html_message = render_to_string('gui/tournoi_inscription_double.html', {
+                'user1': user1,  # Passer l'utilisateur pour le personnaliser dans le template
+                'user2' : user2,
+                'equipe' : Equipe.objects.get(nom_equipe=TeamName),
+                'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+                'tournoi' : Tournoi.objects.get(idtournoi=idtournoi),
+            })
+            send_mail(
+                f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+                "Ceci est un message automatique.",
+                # Message texte brut (en cas de problème avec HTML)
+                'service.raqtour@gmail.com',  # Ton adresse e-mail
+                [email1,email2],  # Adresse de l'utilisateur
+                html_message=html_message,  # Corps HTML de l'email
+                fail_silently=False
+            )
+
+            return redirect("home")
+
+        team = Equipe(nom_equipe=TeamName)
+        team.save()
+
+        utili = Utilisateur.objects.get(user=Use)
+
+
+        equipier = Utilisateur.objects.get(user=User.objects.get(username=usernameTeamMate))
+
+
+        Equipe.objects.get(nom_equipe=TeamName).tournoi.add(tournoi)
+        utili.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
+        equipier.equipe.add(Equipe.objects.get(nom_equipe=TeamName))
+
+        user1 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[0]
+        email1 = user1.user.email
+        user2 = Utilisateur.objects.filter(equipe=Equipe.objects.get(nom_equipe=TeamName))[1]
+        email2 = user1.user.email
+
+        html_message = render_to_string('gui/tournoi_inscription_double.html', {
+            'user1': user1,  # Passer l'utilisateur pour le personnaliser dans le template
+            'user2' : user2,
+            'equipe' : Equipe.objects.get(nom_equipe=TeamName),
+            'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+            'tournoi' : Tournoi.objects.get(idtournoi=idtournoi),
+        })
+        send_mail(
+            f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+            "Ceci est un message automatique.",
+            # Message texte brut (en cas de problème avec HTML)
+            'service.raqtour@gmail.com',  # Ton adresse e-mail
+            [email1, email2],  # Adresse de l'utilisateur
+            html_message=html_message,  # Corps HTML de l'email
+            fail_silently=False
+        )
+
+        messages.success(request, "Votre inscription et celle de votre coéquipier(e) ont bien été effectuée")
         return redirect("home")
     return render(request, 'gui/inscription_tournois.html', context={"liste_equipes" : liste_equipes, "liste_teammates" : liste_teammates,"current_sport": current_sport,'tournoi': tournoi, "is_admin" : is_admin, "current_tab" : "tournois"})
 
@@ -201,9 +247,29 @@ def page_inscription_tournoi(request, idtournoi):
             return redirect('tournoi_details', idtournoi=idtournoi)
         messages.success(request, "Votre inscription a bien été effectuée")
 
+        html_message = render_to_string('gui/tournoi_inscription_simple.html', {
+            'user': user,
+            'site_url': 'https://raqtour.pythonanywhere.com',  # L'URL de ton site
+            'tournoi': Tournoi.objects.get(idtournoi=idtournoi),
+        })
+        send_mail(
+            f"Inscription au Tournoi {Tournoi.objects.get(idtournoi=idtournoi).nom} réussie !",  # Sujet
+            "Ceci est un message automatique.",
+            # Message texte brut (en cas de problème avec HTML)
+            'service.raqtour@gmail.com',  # Ton adresse e-mail
+            [user.user.email],  # Adresse de l'utilisateur
+            html_message=html_message,  # Corps HTML de l'email
+            fail_silently=False
+        )
+
         Utilisateur.objects.get(user=request.user).tournoi.add(tournoi)
 
-        return redirect('liste_tournois', tri=default)
+        if Utilisateur.objects.get(user=request.user).sport_type.sport_type == "Badminton":
+            tri = "badminton"
+        elif Utilisateur.objects.get(user=request.user).sport_type.sport_type == "Tennis":
+            tri = "tennis"
+
+        return redirect('liste_tournois', tri=tri)
     elif tournoi.type.type[:6] == "Double":
         if not Use.is_authenticated:
             messages.error(request, "Vous devez être connecté! ")
@@ -868,7 +934,7 @@ def tournoi_details(request, idtournoi):
                                "current_sport":current_sport})
             else:
                 if tournoi.type.type[:6] == "Simple":
-                    liste_inscrits = Utilisateur.objects.filter(tournoi=tournoi)
+                    liste_inscrits = Utilisateur.objects.filter(tournoi=tournoi).exclude(user__groups__name="Administrateurs")
                     if Utilisateur.objects.filter(user=request.user, tournoi=tournoi).exists():
                         user_participate = True
                     return render(request, 'gui/tournoi_details.html',
@@ -1601,6 +1667,11 @@ def supprimer_compte(request):
         user.groups.clear()
         user.groups.add(groupe_supprime)
         user.is_active = False
+        for tournoi in Tournoi.objects.all():
+            if not (MatchDeTournoi.objects.filter(tournoi=tournoi).exists()):
+                if Utilisateur.objects.filter(equipe__tournoi=tournoi, user=user).exists():
+                    equipe = Utilisateur.objects.get(user=user).equipe.get(tournoi=tournoi)
+                    equipe.tournoi.remove(tournoi)
         user.save()
         messages.success(request, "Votre compte a été supprimé avec succès.")
         return redirect('home')
@@ -1610,6 +1681,16 @@ def desinscription_tournoi(request, idtournoi):
     tournoi = get_object_or_404(Tournoi, idtournoi=idtournoi)
     if tournoi.type.type[:6] == "Simple":
         Utilisateur.objects.get(user=request.user).tournoi.delete(tournoi)
+        html_content = render_to_string('gui/email_desinscription_simple.html',
+                                        {'tournoi': tournoi})
+        send_mail(
+            f'Désinscription au tournoi {tournoi.nom}',
+            f'Bonjour {request.user.username}, vous avez été désinscrits avec succès',
+            'service.raqtour@gmail.com',
+            [request.user.email],
+            fail_silently=False,
+            html_message=html_content
+        )
     elif tournoi.type.type[:6] == "Double":
         liste_equipes = Utilisateur.objects.get(user=request.user).equipe.all()
         for equipe_inscrit in liste_equipes:
@@ -1808,16 +1889,12 @@ def gerer_match_admin(request):
         current_sport = Utilisateur.objects.get(user=request.user).sport_type.sport_type
     is_admin = request.user.groups.filter(name="Administrateurs").exists()
     return render(request,'gui/gerer_matchs_admin.html', {"is_admin" : is_admin, "current_sport" : current_sport, "current_tab" : "administration"})
-
-
 def changer_score(request):
     if not request.user.is_authenticated:
         return redirect('login')  # Redirigez les utilisateurs non authentifiés
-
     is_admin = request.user.groups.filter(name="Administrateurs").exists()
     if not is_admin:
         return redirect('home')  # Redirigez les utilisateurs non autorisés
-
     tournois = Utilisateur.objects.get(user=request.user).tournoi.all()
     selected_tournoi = None
     selected_match = None
@@ -1826,28 +1903,23 @@ def changer_score(request):
     participant2 = None
     matchs = []
     message = None
-
     if request.method == "POST":
         tournoi_id = request.POST.get('tournoi')
         match_id = request.POST.get('match')
         score1 = request.POST.get('score1')
         score2 = request.POST.get('score2')
-
         if tournoi_id:
             selected_tournoi = get_object_or_404(Tournoi, idtournoi=tournoi_id)
             matchs_tournoi = MatchDeTournoi.objects.filter(tournoi=selected_tournoi)
             type_tournoi = selected_tournoi.type.type[:6]
-
         if match_id:
             selected_match = get_object_or_404(MatchDeTournoi, id_match=match_id)
-
         if match_id and score1 is not None and score2 is not None:
             selected_match = get_object_or_404(MatchDeTournoi, id_match=match_id)
             selected_match.score = f"{score1}-{score2}"
             selected_match.save()
             message = "Score mis à jour avec succès."
             return redirect('tournoi_details', idtournoi=tournoi_id)
-
         if type_tournoi == "Simple":
             for match in matchs_tournoi:
                 participant1 = Utilisateur.objects.filter(match=match)[0]
@@ -1858,7 +1930,6 @@ def changer_score(request):
                 participant1 = Utilisateur.objects.filter(match=match)[0].equipe.get(tournoi=selected_tournoi)
                 participant2 = Utilisateur.objects.filter(match=match)[2].equipe.get(tournoi=selected_tournoi)
                 matchs.append({"match": match, "participant1": participant1, "participant2": participant2})
-
     return render(request, 'gui/change_score.html', {
         "is_admin": is_admin,
         "tournois": tournois,
@@ -1870,7 +1941,6 @@ def changer_score(request):
         "participant1" : participant1,
         "participant2": participant2,
     })
-
 def contact(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
@@ -1894,11 +1964,7 @@ def contact(request):
             return render(request, 'gui/success.html')  # Page de succès après envoi
     else:
         form = ContactForm()
-
     return render(request, 'gui/contact_form.html', {'form': form})
-
-
-
 def changer_username(request):
     if request.user.is_authenticated:
         current_sport = Utilisateur.objects.get(user=request.user).sport_type.sport_type
@@ -1919,7 +1985,6 @@ def changer_username(request):
             messages.error(request,"Cet username n'a pas été trouvé dans nos données.")
             return redirect('/changer_username')
     return render(request, 'gui/change_username.html', {"liste_utilisateurs":liste_utilisateurs,"is_admin": is_admin, "current_sport" : current_sport, "current_tab" : "administration"})
-
 def changer_niveau(request):
     if request.user.is_authenticated:
         current_sport = Utilisateur.objects.get(user=request.user).sport_type.sport_type
@@ -1944,15 +2009,12 @@ def changer_niveau(request):
             messages.error(request, "Cet username n'a pas été trouvé dans nos données.")
             return redirect('/changer_username')
     return render(request, 'gui/changer_niveau.html',{"liste_utilisateurs" : liste_utilisateurs, "liste_niveaux" : liste_niveaux,"is_admin": is_admin, "current_sport": current_sport, "current_tab": "administration"})
-
 def supprimer_utilisateur_admin(request):
     if request.user.is_authenticated:
         current_sport = Utilisateur.objects.get(user=request.user).sport_type.sport_type
     else:
         current_sport = None
-
     is_admin = request.user.groups.filter(name="Administrateurs").exists()
-
     if request.method == 'POST':
         username_joueur = request.POST.get('username_joueur')
         if User.objects.filter(username=username_joueur).exists():
@@ -1961,19 +2023,24 @@ def supprimer_utilisateur_admin(request):
             user.groups.clear()
             user.groups.add(groupe_supprime)
             user.is_active = False
+            for tournoi in Tournoi.objects.all():
+                if not (MatchDeTournoi.objects.filter(tournoi=tournoi).exists()):
+                    if Utilisateur.objects.filter(equipe__tournoi=tournoi, user=user).exists():
+                        equipe = Utilisateur.objects.get(user=user).equipe.get(tournoi=tournoi)
+                        equipe.tournoi.remove(tournoi)
             user.save()
             messages.success(request, f"L'utilisateur {username_joueur} a été supprimé avec succès")
             return redirect('/home')
         else:
             messages.error(request, "Cet username n'a pas été trouvé dans nos données.")
             return redirect('/supprimer_utilisateur_admin')
-
     # Récupérer la liste des utilisateurs actifs pour l'administrateur
     utilisateurs = Utilisateur.objects.filter(sport_type__sport_type=current_sport).exclude(user__groups__name="Supprimé").exclude(user__groups__name="Administrateurs") # Vous pouvez filtrer selon des critères si nécessaire
+
+
     return render(request, 'gui/supprimer_utilisateur_admin.html', {
         "is_admin": is_admin,
         "current_sport": current_sport,
         "current_tab": "administration",
         "utilisateurs": utilisateurs  # Passer les utilisateurs à la vue
     })
-
