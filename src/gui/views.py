@@ -319,6 +319,13 @@ def creationTournoi(request):
     else:
         current_sport = None
     is_admin = request.user.groups.filter(name="Administrateurs").exists()
+
+    liste_terrains = []
+    for admin in Utilisateur.objects.filter(sport_type__sport_type=current_sport, user__groups__name="Administrateurs"):
+        for tournoi in admin.tournoi.all():
+            for terrain in tournoi.terrains.all():
+                if terrain not in liste_terrains:
+                    liste_terrains.append(terrain)
     if request.method == 'POST':
         nom = request.POST.get('TournamentName')
         description = request.POST.get('description')
@@ -331,8 +338,12 @@ def creationTournoi(request):
         for i in range(1, num_terrains + 1):
             number = request.POST.get(f"terrainNumber{i}")
             direction = request.POST.get(f"terrainDirections{i}")
+            newnumber = request.POST.get(f"newTerrainNumber{i}")
+            newdirection = request.POST.get(f"newTerrainCommentary{i}")
             if number and direction:
                 terrains.append({"number": number, "direction": direction})
+            if newnumber and newdirection:
+                terrains.append({"number": newnumber, "direction": newdirection})
 
         tour = Tournoi.objects.create(nom=nom, periode_debut=date_debut, description=description, type=Type.objects.get(type=type))
         tour.save()
@@ -360,7 +371,7 @@ def creationTournoi(request):
 
         messages.success(request, f"Création du tournoi {nom} réussie !")
         return redirect("liste_tournois", tri="default")
-    return render(request,"gui/creation_tournoi.html", context={"current_sport" : current_sport,"current_tab" : "administration", "is_admin" : is_admin})
+    return render(request,"gui/creation_tournoi.html", context={"liste_terrains" : liste_terrains,"current_sport" : current_sport,"current_tab" : "administration", "is_admin" : is_admin})
 
 from django.template.loader import render_to_string
 def inscription(request):
