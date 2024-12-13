@@ -79,13 +79,13 @@ WSGI_APPLICATION = 'ProjetSGBD.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        #'NAME': BASE_DIR/'db.sqlite3',
-        'NAME' : 'db4',
-        'USER' : 'user4',
-        'PASSWORD' : 'user4',
-        'HOST' : '143.47.179.70',
-        'PORT' : '443',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR/'db.sqlite3',
+        #'NAME' : 'db4',
+        #'USER' : 'user4',
+        #'PASSWORD' : 'user4',
+        #'HOST' : '143.47.179.70',
+        #'PORT' : '443',
 
     }
 }

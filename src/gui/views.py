@@ -726,6 +726,10 @@ def utilisateur_details(request, username):
                                   "joueur22" : joueur22,
                                 "gagnant" : gagnant,
                                 "type" : match.tournoi.type.type[:6]})
+    if request.user.is_authenticated:
+        current_tab = "profil"
+    else:
+        current_tab = "joueurs"
     contexte = {
         'username': use.username,
         'first_name': use.first_name,
@@ -735,7 +739,7 @@ def utilisateur_details(request, username):
         "sport_type": utili.sport_type.sport_type,
         "niveau": utili.niveau.niveau,
         "is_admin" : is_admin,
-        "current_tab": "profil",
+        "current_tab": current_tab,
         "matchFait" : matchFait,
         "matchAVenir" : matchAVenir,
         "current_sport":current_sport

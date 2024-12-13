@@ -35,19 +35,19 @@
                             {% for tournoi in liste_tournois_tennis %}
                                 <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
                             {% empty %}
-                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                                <li>Aucun tournoi prévu cette semaine : (</li>
                             {% endfor %}
                         {% elif current_sport == "Badminton" %}
                             {% for tournoi in liste_tournois_badminton %}
                                 <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
                             {% empty %}
-                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                                <li>Aucun tournoi prévu cette semaine : (</li>
                             {% endfor %}
                         {% else %}
                             {% for tournoi in liste_tournois_all %}
                                 <li>{{ tournoi.nom }} prévu le {{ tournoi.periode_debut }}</li>
                             {% empty %}
-                                <li>Aucun tournoi prévu cette semaine ; (</li>
+                                <li>Aucun tournoi prévu cette semaine : (</li>
                             {% endfor %}
                         {% endif %}
                     </ul>
@@ -144,7 +144,7 @@
         border-radius: 0.5rem; /* Adoucir les coins */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre plus légère */
     }
-    
+
     /* Conteneur */
     #contact-form .container my-5 {
         max-width: 300px;
@@ -177,7 +177,7 @@
         padding: 0.75rem 1rem;
         font-size: 1rem;
     }
-    
+
     .custom-color {
         color: #6c757d; /* Gris clair */
     }
