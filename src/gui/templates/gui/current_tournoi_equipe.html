@@ -149,9 +149,9 @@
                     <form method="POST" action="{% url 'enregistrer_points' idTournoi=info.match.tournoi.idtournoi id_match=info.match.id_match %}">
                         {% csrf_token %}
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <input type="text" name="points_1" placeholder="Points {{ info.equipe1.nom_equipe }}" style="flex: 1; text-align: left;" required>
+                            <input type="number" name="points_1" placeholder="Points {{ info.equipe1.nom_equipe }}" style="flex: 1; text-align: left;" required>
                             <button type="submit" style="margin: 0 10px;">Valider</button>
-                            <input type="text" name="points_2" placeholder="Points {{ info.equipe2.nom_equipe }}" style="flex: 1; text-align: right;" required>
+                            <input type="number" name="points_2" placeholder="Points {{ info.equipe2.nom_equipe }}" style="flex: 1; text-align: right;" required>
                         </div>
                     </form>
                 </td>

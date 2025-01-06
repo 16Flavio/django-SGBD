@@ -480,7 +480,7 @@ def connexion(request):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            messages.error(request, "Aucun utilisateur trouvé avec cet email")
+            messages.error(request, "Aucun utilisateur trouvé avec cet username")
             return render(request, "gui/connexion.html", {"current_sport" : current_sport,"current_tab" : "connexion", "is_admin" : is_admin})
 
         new_user = authenticate(username=username, password=password1)
@@ -513,12 +513,12 @@ def calendrier(request):
     try:
         month = int(request.GET.get('month', current_month))
         year = int(request.GET.get('year', 2024))
-        tri = str(request.GET.get('tri', "all"))
+        tri = str(request.GET.get('tri', "perso"))
     except ValueError:
 
         month = current_month
         year = 2024
-        tri = "all"
+        tri = "perso"
 
     if month < 1:
         month = 1
@@ -1818,7 +1818,6 @@ def recupMDP(request):
             messages.error(request, "L'adresse mail n'existe pas ! Essayez une nouvelle adresse")
             return redirect("recuperation_mdp")
     return render(request, "gui/changepassword.html", {"is_admin" : is_admin, "current_sport" : current_sport, "current_tab" : "connexion"})
-
 verification_codes = {}
 def generateMDP(request, username):
     user = User.objects.get(username=username)
@@ -1885,8 +1884,6 @@ def reset_password(request, email):
 
 def charte(request):
     return render(request, 'gui/charte.html')
-
-
 def gerer_utilisateur_admin(request):
     current_sport = None
     if request.user.is_authenticated:
@@ -2047,8 +2044,6 @@ def supprimer_utilisateur_admin(request):
             return redirect('/supprimer_utilisateur_admin')
     # Récupérer la liste des utilisateurs actifs pour l'administrateur
     utilisateurs = Utilisateur.objects.filter(sport_type__sport_type=current_sport).exclude(user__groups__name="Supprimé").exclude(user__groups__name="Administrateurs") # Vous pouvez filtrer selon des critères si nécessaire
-
-
     return render(request, 'gui/supprimer_utilisateur_admin.html', {
         "is_admin": is_admin,
         "current_sport": current_sport,
