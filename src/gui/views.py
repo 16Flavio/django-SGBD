@@ -1691,7 +1691,7 @@ def supprimer_compte(request):
 def desinscription_tournoi(request, idtournoi):
     tournoi = get_object_or_404(Tournoi, idtournoi=idtournoi)
     if tournoi.type.type[:6] == "Simple":
-        Utilisateur.objects.get(user=request.user).tournoi.delete(tournoi)
+        Utilisateur.objects.get(user=request.user).tournoi.remove(tournoi)
         html_content = render_to_string('gui/email_desinscription_simple.html',
                                         {'tournoi': tournoi})
         send_mail(
